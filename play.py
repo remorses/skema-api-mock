@@ -72,6 +72,7 @@ def main():
 
 
 def handle_result_type(result):
+    return result
     if isinstance(result, str):
         return json.loads(result)
     else:

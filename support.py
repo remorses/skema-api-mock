@@ -1,4 +1,5 @@
 import yaml
+import ruamel.yaml
 
 def _dot_lookup(thing, comp, import_path):
     try:
@@ -29,5 +30,11 @@ def str_presenter(dumper, data):
     
 yaml.add_representer(str, str_presenter)
 
+def dumps_yaml_(data):
+    return yaml.dump(data, Dumper=Dumper, default_flow_style=False, default_style='|', indent=4)
+
 def dumps_yaml(data):
-    return yaml.dump(data, Dumper=Dumper, default_flow_style=False, default_style='|')
+    res = ""
+    for line in ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=4, default_style='|').splitlines(True):
+        res += line
+    return res
