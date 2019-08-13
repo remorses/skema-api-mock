@@ -1,14 +1,14 @@
 import mock
 import yaml
 import json
-import skema
-
 import skema.infer
+
 from collections import defaultdict
 from typing import Dict, Union
 from urllib.parse import urlparse
-from support import importer, dumps_yaml
 from funcy import contextmanager
+
+from .support import importer, dumps_yaml
 
 def load(path):
     if path.endswith('.yml') or path.endswith('.yaml'):
@@ -39,7 +39,7 @@ def fuzzy_compare_urls(a, b):
 
     
 
-def patch(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
+def mock_api(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
     """
     name.com/path1/path2
     www.name.com/path1/path2
@@ -58,16 +58,10 @@ def patch(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
             key = [x for x in url_map if fuzzy_compare_urls(url, x)][0]
             schema = url_map[key]
             return skema.fake_data(schema, amount=1)[-1]
-        except IndexError as e:
+        except IndexError:
             raise Exception(f'{url} not found')
 
     return mock.patch(function_path, new_callable=lambda: mocked)
-
-
-patch('skema.to_jsonschema', 'urlmap.yaml', arg=0).start()
-def main():
-    res = skema.to_jsonschema('http://instagram.com/ciao/')
-    print(res)
 
 
 
