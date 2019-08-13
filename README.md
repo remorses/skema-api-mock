@@ -4,7 +4,7 @@ Every url can have different shape, these are represented in skema format in a y
 ```yaml
 /posts/: |
     Response:
-        ok: Bool
+        ok: Boolù
         data: [
             postName: Str
             date: Str

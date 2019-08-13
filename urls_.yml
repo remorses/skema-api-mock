@@ -1,7 +1,9 @@
 "9": |
     Root: Int | Any
+
 "{ciao: []}": |
     Root:
         ciao: [Any]
+        
 "ciao": |
     Root: Any | Str
