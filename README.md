@@ -4,7 +4,7 @@ Every url can have different shape, these are represented in skema format in a y
 ```yaml
 /posts/: |
     Response:
-        ok: Boolù
+        ok: Bool
         data: [
             postName: Str
             date: Str
@@ -22,6 +22,27 @@ Every url can have different shape, these are represented in skema format in a y
 The shape of the data can change based on url hostname or path.
 an example:
 ```python
+from api import api_call
+
+with mock_api('api.api_call', 'api_shape.yml', arg=0):
+    data = api_call('/posts/')
+    print(data) # {'ok': True, 'data': {'postName': 'sdfsdgx', 'date': 'sdfg4'}}
+```
+
+## genrating the api shapes
+
+You can generating the shapes calling many times the api
+```python
+from api import api_call
+
+with track_function_call('api.api_call', 'api_shape.yaml', ):
+    api_call('/posts/')
+    api_call('/post/34')
+    api_call('/post/14')
+    api_call('/data/')
+
+# a file api_shape.yaml is created
+assert os.path.exists('api_shape)
 ```
 
 ## todo:
