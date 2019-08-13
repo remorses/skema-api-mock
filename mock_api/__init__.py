@@ -101,7 +101,3 @@ def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
 
 
 
-with track_function_call('yaml.load', 'urls.yml') as m:
-    yaml.load('9')
-    yaml.load('{ciao: []}')
-    yaml.load('ciao')
