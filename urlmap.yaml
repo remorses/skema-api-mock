@@ -1,0 +1,4 @@
+/ciao/: |
+    Response:
+        x: Int
+        y: Str

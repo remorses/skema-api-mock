@@ -1,0 +1,112 @@
+import mock
+import yaml
+import json
+import skema
+
+import skema.infer
+from collections import defaultdict
+from typing import Dict, Union
+from urllib.parse import urlparse
+from support import importer, dumps_yaml
+from funcy import contextmanager
+
+def load(path):
+    if path.endswith('.yml') or path.endswith('.yaml'):
+        with open(path,) as f:
+            data = yaml.load(f, )
+            return data
+    else:
+        raise NotImplementedError()
+
+def hostname_and_path(url: str):
+    a = urlparse(url)
+    hostnames =  a.hostname.split('.')[-2:] if a.hostname else []
+    hostname = '.'.join(hostnames)
+    paths = filter(bool, a.path.split('/'))
+    paths = list(paths)
+    if not hostname and not url.startswith('/'):
+        if '.' in paths[0]:
+            hostname = paths.pop(0)
+    return hostname, list(paths)
+
+def fuzzy_compare_urls(a, b):
+    a_name, a_paths = hostname_and_path(a)
+    b_name, b_paths = hostname_and_path(b)
+    if a_name and b_name:
+        return a_name == b_name and a_paths == b_paths
+    else:
+        return a_paths == b_paths
+
+    
+
+def patch(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
+    """
+    name.com/path1/path2
+    www.name.com/path1/path2
+    /path/ciao/
+    path/ciao
+    """
+    if isinstance(url_map, str):
+        url_map: Dict[str, dict] = load(url_map)
+
+    def mocked(*args, **kwargs):
+        if kwarg is not None:
+            url = kwargs[kwarg]
+        else:
+            url = args[arg]
+        try:
+            key = [x for x in url_map if fuzzy_compare_urls(url, x)][0]
+            schema = url_map[key]
+            return skema.fake_data(schema, amount=1)[-1]
+        except IndexError as e:
+            raise Exception(f'{url} not found')
+
+    return mock.patch(function_path, new_callable=lambda: mocked)
+
+
+patch('skema.to_jsonschema', 'urlmap.yaml', arg=0).start()
+def main():
+    res = skema.to_jsonschema('http://instagram.com/ciao/')
+    print(res)
+
+
+
+def handle_result_type(result):
+    if isinstance(result, str):
+        return json.loads(result)
+    else:
+        return result
+
+
+@contextmanager
+def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
+    function = importer(function_path)
+    data_per_url = defaultdict(list)
+    def mocked(*args, **kwargs):
+        if kwarg is not None:
+            url = kwargs[kwarg]
+        else:
+            url = args[arg]
+        parsed = urlparse(url)
+        url = parsed.hostname or '' + parsed.path or ''
+        result = function(*args, **kwargs)
+        result = handle_result_type(result)
+        data_per_url[url] += [result]
+        return result
+    m = mock.patch(function_path, new_callable=lambda: mocked)
+    m.start()
+    try:
+        yield m
+    finally:
+        m.stop()
+        url_map = {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
+        with open(url_map_path, 'w') as f:
+            data = dumps_yaml(url_map)
+            f.write(data)
+
+
+
+with track_function_call('yaml.load', 'urls.yml') as m:
+    yaml.load('9')
+    yaml.load('{ciao: []}')
+    yaml.load('ciao')
