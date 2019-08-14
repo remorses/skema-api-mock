@@ -1,6 +1,7 @@
 import pytest
 import os.path
 import yaml
+from funcy import silent
 from mock_api import mock_api, track_function_call
 
 urlmap = {
@@ -28,7 +29,7 @@ def test_2():
 
 def test_3():
     path = 'urls_.yml'
-    os.remove(path)
+    silent(os.remove)(path)
     with track_function_call('yaml.load', path, ):
         yaml.load('9')
         yaml.load('{ciao: []}')
