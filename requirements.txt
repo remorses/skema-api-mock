@@ -2,3 +2,4 @@ funcy
 mock
 ruamel.yaml
 pyyaml
+skema
