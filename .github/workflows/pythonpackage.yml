@@ -1,0 +1,42 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python
+      uses: actions/setup-python@v1
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest
+    - name: deploy
+      uses: docker://plugins/pypi
+      env:
+        DRONE_USERNAME: ${{ secrets.pypi_username }}
+        DRONE_PASSWORD: ${{ secrets.pypi_password }}
+    - name: bump version
+      uses: docker://xplugins/bump
+      env:
+        DRONE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRONE_VERSIONFILE: VERSION
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
