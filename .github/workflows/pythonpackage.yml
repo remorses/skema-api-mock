@@ -18,7 +18,7 @@ jobs:
         pip install pytest
         pytest
     - name: Bump version
-      uses: remorses/bump-version@v7
+      uses: remorses/bump-version@v8
       with:
         version_file: VERSION
       env:
