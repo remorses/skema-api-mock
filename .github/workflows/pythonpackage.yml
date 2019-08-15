@@ -17,16 +17,15 @@ jobs:
       run: |
         pip install pytest
         pytest
-    - name: deploy
-      uses: docker://plugins/pypi
-      env:
-        DRONE_USERNAME: ${{ secrets.pypi_username }}
-        DRONE_PASSWORD: ${{ secrets.pypi_password }}
-    - name: bump version
-      uses: docker://xplugins/bump
-      env:
-        DRONE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DRONE_VERSIONFILE: VERSION
+    - name: Publish
+      uses: remorses/pypi@v1
+      with:
+        username: ${{ secrets.pypi_username }}
+        password: ${{ secrets.pypi_password }}
+    - name: Bump version
+      uses: remorses/bump-version@0
+      with:
+        version_file: VERSION
     
     
     
