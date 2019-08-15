@@ -23,7 +23,7 @@ jobs:
         username: ${{ secrets.pypi_username }}
         password: ${{ secrets.pypi_password }}
     - name: Bump version
-      uses: remorses/bump-version@v2
+      uses: remorses/bump-version@v3
       with:
         version_file: VERSION
 
