@@ -18,7 +18,7 @@ jobs:
         pip install pytest
         pytest
     - name: Publish
-      uses: remorses/pypi@v1
+      uses: remorses/pypi@v2
       with:
         username: ${{ secrets.pypi_username }}
         password: ${{ secrets.pypi_password }}
