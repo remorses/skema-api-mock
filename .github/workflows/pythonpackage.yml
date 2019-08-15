@@ -24,7 +24,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish
-      uses: remorses/pypi@v2
+      uses: remorses/pypi@v6
       with:
         username: ${{ secrets.pypi_username }}
         password: ${{ secrets.pypi_password }}
