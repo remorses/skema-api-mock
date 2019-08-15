@@ -1,0 +1,7 @@
+"9": |
+    Root:  Int
+"{ciao: []}": |
+    Root:
+        ciao: [Any]
+"ciao": |
+    Root:  Any
