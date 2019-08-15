@@ -18,13 +18,13 @@ jobs:
         pip install pytest
         pytest
     - name: Bump version
-      uses: remorses/bump-version@v5
+      uses: remorses/bump-version@v6
       with:
         version_file: VERSION
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish
-      uses: remorses/pypi@v6
+      uses: remorses/pypi@v2
       with:
         username: ${{ secrets.pypi_username }}
         password: ${{ secrets.pypi_password }}
