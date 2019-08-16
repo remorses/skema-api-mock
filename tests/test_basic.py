@@ -3,7 +3,7 @@ import os.path
 import yaml
 from xxx import Klass
 from funcy import silent
-from mock_api import mock_function, mock_method, track_function, track_method, same_url
+from mock_api import mock_function, mock_method, track_function, track_method, same_url, aggregate_same_urls, schema_difference_coefficent, group_equal, parametrize_urls
 
 urlmap = {
     '/': 'Root: Str',
@@ -99,13 +99,57 @@ def test_mock_method():
 @pytest.mark.parametrize(
     'a, b, expected',
     [
-        ('/ciao/x', 'ciao/x', '/ciao/x'),
-        ('/ciao/34', 'ciao/12', '/ciao/{}'),
-        ('/ciao/34/xxx', '/ciao/4/xxx', '/ciao/{}/xxx'),
-        ('http://instagram.com/ciao/34/xxx', 'http://instagram.com/ciao/4/xxx', 'instagram.com/ciao/{}/xxx'),
+        ('/ciao/x', 'ciao/x', True),
+        ('/ciao/34', 'ciao/12', True),
+        ('/ciao/34/xxx', '/ciao/4/xxx', True),
+        ('http://instagram.com/ciao/34/xxx', 'http://instagram.com/ciao/4/xxx', True),
+        ('a/b/x/s', 'a/b/1/k', False)
     ]
 )
 def test_same_url(a, b, expected):
     res = same_url(a, b)
     print(res)
     assert res == expected
+
+
+def test_aggregate_same_urls():
+    data = {
+        '/xxx/1': [0, ],
+        '/xxx/2': [1, ],
+        '/xxx/3': [2, ],
+    }
+    aggregate_same_urls(data)
+
+def test_schema_difference_coefficent():
+    a = {
+        'properties': {
+            'x': 1,
+            'y': 1,
+            'a': 1,
+        }
+    }
+    b = {
+        'properties': {
+            'x': 1,
+            'y': 1,
+            'k': 1,
+            'h': 1,
+        }
+    }
+    y = schema_difference_coefficent(a, b)
+    print(y)
+
+def test_group_by():
+    equal = lambda a, b: a+b == 3
+    groups = group_equal([1, 2, 3, 2, 3, 4, 1, 2 ], equal=equal)
+    print(groups)
+
+
+def test_parametrize_urls():
+    x = parametrize_urls([
+        'xxx/ciao/8/x',
+        'xxx/ciao/9/x',
+        'xxx/ciao/2/x',
+    ])
+    print(x)
+    assert x == 'xxx/ciao/{}/x'
