@@ -83,20 +83,16 @@ def mock_method(class_path, method, url_map: Union[str, dict], arg=1, kwarg=None
     setattr(klass, method, mocked)
     return mock.patch(class_path, new_callable=lambda: klass)
 
-
-
-def handle_result_type(result):
+def replace_special_types(array):
+    result = []
+    inferrable_types = (dict, str, bool, int, float, list,)
+    for obj in array:
+        if isinstance(obj, dict):
+            data = json.dumps(obj, default=str)
+            result.append(json.loads(data))
+        elif any([isinstance(obj, x) for x in inferrable_types]):
+            result.append(obj)
     return result
-    if isinstance(result, dict):
-        data = json.dumps(result, default=str)
-        return json.loads(data)
-    if isinstance(result, str):
-        try:
-            return json.loads(result)
-        except Exception:
-            return result
-    return result
-
 
 @contextmanager
 def track_function(function_path, url_map_path, arg=0, kwarg=None):
@@ -110,7 +106,6 @@ def track_function(function_path, url_map_path, arg=0, kwarg=None):
         parsed = urlparse(url)
         url = parsed.hostname or '' + parsed.path or ''
         result = function(*args, **kwargs)
-        result = handle_result_type(result)
         data_per_url[url] += [result]
         return result
     m = mock.patch(function_path, new_callable=lambda: mocked)
@@ -119,7 +114,7 @@ def track_function(function_path, url_map_path, arg=0, kwarg=None):
         yield m
     finally:
         m.stop()
-        url_map = {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
+        url_map = make_url_map(data_per_url)
         if os.path.exists(url_map_path):
             with open(url_map_path, 'r') as f:
                 data = yaml.load(f)
@@ -128,7 +123,9 @@ def track_function(function_path, url_map_path, arg=0, kwarg=None):
             data = dumps_yaml(url_map)
             f.write(data)
 
-
+def make_url_map(data_per_url):
+    data_per_url = {k:replace_special_types(array) for k, array in data_per_url.items()}
+    return {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
 
 
 @contextmanager
@@ -145,7 +142,6 @@ def track_method(class_path, method, url_map_path, arg=1, kwarg=None):
         parsed = urlparse(url)
         url = parsed.hostname or '' + parsed.path or ''
         result = function(*args, **kwargs)
-        result = handle_result_type(result)
         data_per_url[url] += [result]
         return result
     setattr(klass, method, mocked)
@@ -155,7 +151,7 @@ def track_method(class_path, method, url_map_path, arg=1, kwarg=None):
         yield m
     finally:
         m.stop()
-        url_map = {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
+        url_map = make_url_map(data_per_url)
         if os.path.exists(url_map_path):
             with open(url_map_path, 'r') as f:
                 data = yaml.load(f)
