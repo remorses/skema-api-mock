@@ -87,10 +87,15 @@ def mock_method(class_path, method, url_map: Union[str, dict], arg=1, kwarg=None
 
 def handle_result_type(result):
     return result
+    if isinstance(result, dict):
+        data = json.dumps(result, default=str)
+        return json.loads(data)
     if isinstance(result, str):
-        return json.loads(result)
-    else:
-        return result
+        try:
+            return json.loads(result)
+        except Exception:
+            return result
+    return result
 
 
 @contextmanager
