@@ -63,6 +63,25 @@ def mock_api(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
             raise Exception(f'{url} not found')
 
     return mock.patch(function_path, new_callable=lambda: mocked)
+    
+
+def mock_method(class_path, method, url_map: Union[str, dict], arg=1, kwarg=None):
+    klass = importer(class_path)
+    if isinstance(url_map, str):
+        url_map: Dict[str, dict] = load(url_map)
+    def mocked(*args, **kwargs):
+        if kwarg is not None:
+            url = kwargs[kwarg]
+        else:
+            url = args[arg]
+        try:
+            key = [x for x in url_map if fuzzy_compare_urls(url, x)][0]
+            schema = url_map[key]
+            return skema.fake_data(schema, amount=1)[-1]
+        except IndexError:
+            raise Exception(f'{url} not found')
+    setattr(klass, method, mocked)
+    return mock.patch(class_path, new_callable=lambda: klass)
 
 
 
@@ -106,3 +125,36 @@ def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
 
 
 
+
+@contextmanager
+def track_class_method(class_path, method, url_map_path, arg=1, kwarg=None):
+    klass = importer(class_path)
+    function = getattr(klass, method)
+    data_per_url = defaultdict(list)
+    def mocked(*args, **kwargs):
+        # print(args)
+        if kwarg is not None:
+            url = kwargs[kwarg]
+        else:
+            url = args[arg]
+        parsed = urlparse(url)
+        url = parsed.hostname or '' + parsed.path or ''
+        result = function(*args, **kwargs)
+        result = handle_result_type(result)
+        data_per_url[url] += [result]
+        return result
+    setattr(klass, method, mocked)
+    m = mock.patch(class_path, new_callable=lambda: klass)
+    m.start()
+    try:
+        yield m
+    finally:
+        m.stop()
+        url_map = {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
+        if os.path.exists(url_map_path):
+            with open(url_map_path, 'r') as f:
+                data = yaml.load(f)
+                url_map = {**data, **url_map}
+        with open(url_map_path, 'w') as f:
+            data = dumps_yaml(url_map)
+            f.write(data)

@@ -1,8 +1,9 @@
 import pytest
 import os.path
 import yaml
+from xxx import Klass
 from funcy import silent
-from mock_api import mock_api, track_function_call
+from mock_api import mock_api, mock_method, track_function_call, track_class_method
 
 urlmap = {
     '/ciao/': """
@@ -37,3 +38,28 @@ def test_3():
     assert os.path.exists(path)
     with open(path) as f:
         print(f.read())
+    silent(os.remove)(path)
+
+
+
+def test_track_class():
+    path = 'urls_.yml'
+    silent(os.remove)(path)
+    with track_class_method('xxx.Klass', 'ciao', path,):
+        x = Klass()
+        x.ciao('asdasd')
+        x.ciao('sdfsd')
+        x.ciao('asdasd')
+    assert os.path.exists(path)
+    with open(path) as f:
+        print(f.read())
+    silent(os.remove)(path)
+
+
+def test_mock_method():
+    with mock_method('xxx.Klass', 'ciao', urlmap, arg=1):
+        k = Klass()
+        res = k.ciao('http://instagram.com/ciao/')
+        print(res)
+        with pytest.raises(Exception):
+            res = k.ciao('http://instagram.com/xxx/')
