@@ -3,7 +3,7 @@ import os.path
 import yaml
 from xxx import Klass
 from funcy import silent
-from mock_api import mock_api, mock_method, track_function_call, track_class_method
+from mock_api import mock_function, mock_method, track_function, track_method
 
 urlmap = {
     '/ciao/': """
@@ -13,7 +13,7 @@ urlmap = {
     """
 }
 def test_1():
-    with mock_api('yaml.load', urlmap, arg=0) as m:
+    with mock_function('yaml.load', urlmap, arg=0) as m:
         res = yaml.load('http://instagram.com/ciao/')
         print(res)
         assert 'x' in res
@@ -21,7 +21,7 @@ def test_1():
     assert yaml.load('9') == 9
 
 def test_2():
-    m = mock_api('yaml.load', urlmap, arg=0)
+    m = mock_function('yaml.load', urlmap, arg=0)
     m.start()
     with pytest.raises(Exception):
         res = yaml.load('http://instagram.com/xxx/')
@@ -31,7 +31,7 @@ def test_2():
 def test_3():
     path = 'urls_.yml'
     silent(os.remove)(path)
-    with track_function_call('yaml.load', path, ):
+    with track_function('yaml.load', path, ):
         yaml.load('9')
         yaml.load('{ciao: []}')
         yaml.load('ciao')
@@ -45,7 +45,7 @@ def test_3():
 def test_track_class():
     path = 'urls_.yml'
     silent(os.remove)(path)
-    with track_class_method('xxx.Klass', 'ciao', path,):
+    with track_method('xxx.Klass', 'ciao', path,):
         x = Klass()
         x.ciao('asdasd')
         x.ciao('sdfsd')

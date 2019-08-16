@@ -40,7 +40,7 @@ def fuzzy_compare_urls(a, b):
 
     
 
-def mock_api(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
+def mock_function(function_path, url_map: Union[str, dict], arg=0, kwarg=None):
     """
     name.com/path1/path2
     www.name.com/path1/path2
@@ -94,7 +94,7 @@ def handle_result_type(result):
 
 
 @contextmanager
-def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
+def track_function(function_path, url_map_path, arg=0, kwarg=None):
     function = importer(function_path)
     data_per_url = defaultdict(list)
     def mocked(*args, **kwargs):
@@ -127,7 +127,7 @@ def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
 
 
 @contextmanager
-def track_class_method(class_path, method, url_map_path, arg=1, kwarg=None):
+def track_method(class_path, method, url_map_path, arg=1, kwarg=None):
     klass = importer(class_path)
     function = getattr(klass, method)
     data_per_url = defaultdict(list)

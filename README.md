@@ -22,10 +22,10 @@ Every url can have different shape, these are represented in skema format in a y
 The shape of the data can change based on url hostname or path.
 an example:
 ```python
-from mock_api import mock_api
-from api import api_call
+from mock_api import mock_function
+from myapi import api_call
 
-with mock_api('api.api_call', 'api_shape.yml', arg=0):
+with mock_function('myapi.api_call', 'api_shape.yml', arg=0):
     data = api_call('/posts/')
     print(data) # {'ok': True, 'data': {'postName': 'sdfsdgx', 'date': 'sdfg4'}}
 ```
@@ -34,10 +34,10 @@ with mock_api('api.api_call', 'api_shape.yml', arg=0):
 
 You can generating the shapes calling many times the api
 ```python
-from mock_api import mock_api
-from api import api_call
+from mock_api import track_function
+from myapi import api_call
 
-with track_function_call('api.api_call', 'api_shape.yaml', ):
+with track_function('myapi.api_call', 'api_shape.yaml', ):
     api_call('/posts/')
     api_call('/post/34')
     api_call('/post/14')
