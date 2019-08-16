@@ -1,4 +1,5 @@
 import mock
+import os
 import yaml
 import json
 import skema.infer
@@ -95,6 +96,10 @@ def track_function_call(function_path, url_map_path, arg=0, kwarg=None):
     finally:
         m.stop()
         url_map = {url: skema.infer.infer_skema(array, ) for url, array in data_per_url.items()}
+        if os.path.exists(url_map_path):
+            with open(url_map_path, 'r') as f:
+                data = yaml.load(f)
+                url_map = {**data, **url_map}
         with open(url_map_path, 'w') as f:
             data = dumps_yaml(url_map)
             f.write(data)
