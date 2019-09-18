@@ -158,13 +158,17 @@ def make_url_map(data_per_url):
     def equal(a, b):
         url1, schema1 = a
         url2, schema2 = b
-        return same_url(url1, url2) # and schema_difference_coefficent(schema1, schema2) < 0.5
+        return same_url(url1, url2) and schema_difference_coefficent(schema1, schema2) < 0.4
     data_per_url = {k:replace_special_types(array) for k, array in data_per_url.items()}
     url_map = {url: skema.infer.infer_schema(array,) for url, array in data_per_url.items()}
     same_urls_schemas = group_equal(url_map.items(), equal=equal)
-    same_urls_schemas = ungroup_small_groups(same_urls_schemas, small=2)
+    print([[x[0] for x in group] for group in same_urls_schemas])
+    same_urls_schemas = ungroup_small_groups(same_urls_schemas, small=3)
+    same_urls_schemas = list(same_urls_schemas)
+    print([[x[0] for x in group] for group in same_urls_schemas])
     url_map = {parametrize_urls([x[0] for x in group]): longer_schema([x[1] for x in group]) for group in same_urls_schemas}
     url_map = {url: skema.infer.from_jsonschema(schema, ref_name='Root') for url, schema in url_map.items()}
+    print(list(url_map.values()))
     return url_map
 
 def same_url(url_a, url_b):

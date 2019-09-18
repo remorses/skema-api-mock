@@ -132,8 +132,7 @@ def test_schema_difference_coefficent():
         'properties': {
             'x': 1,
             'y': 1,
-            'k': 1,
-            'h': 1,
+            'a': 9
         }
     }
     y = schema_difference_coefficent(a, b)
